@@ -7,6 +7,7 @@ class Model:
         self._edges = None
         self.G = nx.Graph()
 
+        self._id_map = {}
         self._all_hubs = []
         self._tratte_valide = []
 
@@ -21,32 +22,20 @@ class Model:
         self._tratte_valide.clear()
 
         self._all_hubs = DAO.get_hub()
+        for hub in self._all_hubs:
+            self._id_map[hub.id] = hub
+
         self.G.add_nodes_from(self._all_hubs)
+
         tratte = DAO.get_tratte()
-
         for tratta in tratte:
-            id_hub1 = tratta['id_hub1']
-            id_hub2 = tratta['id_hub2']
-            somma_valore = tratta['somma_valore']
-            num_spedizioni = tratta['num_spedizioni']
-            guadagno_medio = somma_valore / num_spedizioni
-
-            u = None
-            v = None
-
-            for hub in self._all_hubs:
-                if hub.id == id_hub1:
-                    u = hub
-                    break
-            for hub in self._all_hubs:
-                if hub.id == id_hub2:
-                    v = hub
-                    break
+            guadagno_medio = tratta.guadagno_medio
 
             if guadagno_medio >= threshold:
+                u = self._id_map[tratta._id_hub1]
+                v = self._id_map[tratta._id_hub2]
                 self.G.add_edge(u,v, weight=guadagno_medio)
                 self._tratte_valide.append((u, v, guadagno_medio))
-
 
     def get_num_edges(self):
         """

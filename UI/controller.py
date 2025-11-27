@@ -17,8 +17,36 @@ class Controller:
         * Lista di Tratte che superano il costo indicato come soglia
         """
         # TODO
-        if self._view.guadagno_medio_minimo is not None and self._view.guadagno_medio_minimo:
+        treshold = self._view.guadagno_medio_minimo.value
+
+
+        if not treshold:
+            self._view.show_alert("Nessun guadagno minimo inserito")
+            return
+        try:
+            minimo = float(treshold)
+            self._model.costruisci_grafo(minimo)
+
+        except ValueError:
+            self._view.show_alert("Inserisci guadagno minimo valido")
+            return
+
         num_hub = self._model.get_num_nodes()
         num_tratte = self._model.get_num_edges()
+        tratte = self._model.get_all_edges()
+
+        self._view.lista_visualizzazione.controls.clear()
+        self._view.lista_visualizzazione.controls.append(ft.Text(f"Numero di hub: {num_hub}"))
+        self._view.lista_visualizzazione.controls.append(ft.Text(f"Numero di tratte: {num_tratte}"))
+
+        for u, v, peso in tratte:
+            self._view.lista_visualizzazione.controls.append(
+                ft.Text(f"{u.nome}({u.stato} -> {v.nome}({v.stato} -- Guadagno medio per spedizione {}")
+            )
+
+
+
+
+
 
 

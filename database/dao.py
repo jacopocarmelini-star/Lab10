@@ -1,4 +1,6 @@
 from database.DB_connect import DBConnect
+from model.hub import Hub
+from model.tratta import Tratta
 
 class DAO:
     """
@@ -9,6 +11,7 @@ class DAO:
     @staticmethod
     def get_tratte():
         cnx = DBConnect.get_connection()
+        result = []
         cursor = cnx.cursor(dictionary=True)
         query = """SELECT LEAST(s.id_hub_origine, s.id_hub_destinazione) AS id_hub1,
 		                GREATEST(s.id_hub_origine, s.id_hub_destinazione) AS id_hub2,
@@ -18,19 +21,27 @@ class DAO:
                         HAVING id_hub1 != id_hub2"""
 
         cursor.execute(query)
-        results = cursor.fetchall()
+        for row in cursor:
+            tratta = Tratta(_id_hub1=row['id_hub1'], _id_hub2=row['id_hub2'],
+                            _somma_valore=row['somma_valore'], _num_spedizioni=row['num_spedizioni'])
+            result.append(tratta)
         cursor.close()
         cnx.close()
-        return results
+        return result
+
 
     @staticmethod
     def get_hub():
-        cnx =DBConnect.get_connection()
+        cnx = DBConnect.get_connection()
+        result = []
         cursor = cnx.cursor(dictionary=True)
         query = """SELECT *
-                    FROM hub"""
+                        FROM hub"""
         cursor.execute(query)
-        results = cursor.fetchall()
+        for row in cursor:
+            hub = Hub(id=row["id"], codice=row["codice"], nome=row["nome"], citta=row["citta"],
+                      stato=row["stato"], latitudine=row["latitudine"], longitudine=row["longitudine"])
+            result.append(hub)
         cursor.close()
         cnx.close()
-        return results
+        return result
